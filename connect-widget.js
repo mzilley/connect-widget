@@ -414,7 +414,7 @@
         .cw-form-select:focus,
         .cw-form-textarea:focus {
             outline: none;
-            border-color: var(--cw-primary);
+            border-color: var(--cw-primary)!important;
             box-shadow: 0 0 0 3px var(--cw-primary-light);
         }
 
