@@ -402,7 +402,7 @@
         .cw-form-textarea {
             width: 100%;
             padding: 14px 16px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
             font-family: inherit;
