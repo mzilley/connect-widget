@@ -1,0 +1,8 @@
+name = "connect-widget-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables (set these in Cloudflare dashboard for security)
+# [vars]
+# HCP_API_KEY = "your-api-key-here"
+# ALLOWED_ORIGINS = "https://example.com,https://www.example.com"

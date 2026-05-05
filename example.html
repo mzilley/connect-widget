@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Widget Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .demo-card h3 {
+            color: #555;
+            margin: 20px 0 10px;
+            font-size: 1.1rem;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .string { color: #ce9178; }
+        .keyword { color: #569cd6; }
+        .comment { color: #6a9955; }
+        .property { color: #9cdcfe; }
+
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .config-table th,
+        .config-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .config-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .config-table code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-required {
+            background: #ffe0e0;
+            color: #c00;
+        }
+
+        .badge-optional {
+            background: #e0f0ff;
+            color: #0066cc;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .demo-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .demo-btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Connect Widget</h1>
+            <p>A customizable, embeddable contact widget for any website</p>
+        </div>
+
+        <div class="demo-card">
+            <h2>Quick Start</h2>
+            <p>Add this code snippet to your website, just before the closing <code>&lt;/body&gt;</code> tag:</p>
+
+            <pre><code><span class="comment">&lt;!-- Connect Widget Configuration --&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  <span class="property">window</span>.ConnectWidgetConfig = {
+    <span class="property">companyName</span>: <span class="string">'Your Company Name'</span>,
+    <span class="property">companyLogo</span>: <span class="string">'https://example.com/logo.png'</span>,
+    <span class="property">primaryColor</span>: <span class="string">'#4285f4'</span>,
+    <span class="property">phone</span>: <span class="string">'555-123-4567'</span>,
+    <span class="property">email</span>: <span class="string">'contact@example.com'</span>,
+    <span class="property">webhookUrl</span>: <span class="string">'https://your-api.com/leads'</span>,
+  };
+<span class="keyword">&lt;/script&gt;</span>
+<span class="comment">&lt;!-- Connect Widget Script --&gt;</span>
+<span class="keyword">&lt;script</span> <span class="property">src</span>=<span class="string">"connect-widget.js"</span> <span class="property">async</span><span class="keyword">&gt;&lt;/script&gt;</span></code></pre>
+
+            <div class="demo-buttons">
+                <button class="demo-btn demo-btn-primary" onclick="ConnectWidget.open()">
+                    Open Widget
+                </button>
+                <button class="demo-btn demo-btn-secondary" onclick="ConnectWidget.close()">
+                    Close Widget
+                </button>
+            </div>
+        </div>
+
+        <div class="demo-card">
+            <h2>Configuration Options</h2>
+
+            <table class="config-table">
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>companyName</code></td>
+                        <td>string</td>
+                        <td><code>'Your Company'</code></td>
+                        <td>Your company name displayed in the widget</td>
+                    </tr>
+                    <tr>
+                        <td><code>companyLogo</code></td>
+                        <td>string</td>
+                        <td><code>''</code></td>
+                        <td>URL to your company logo image</td>
+                    </tr>
+                    <tr>
+                        <td><code>primaryColor</code></td>
+                        <td>string</td>
+                        <td><code>'#4285f4'</code></td>
+                        <td>Primary brand color (hex format)</td>
+                    </tr>
+                    <tr>
+                        <td><code>phone</code></td>
+                        <td>string</td>
+                        <td><code>''</code></td>
+                        <td>Phone number for the "Call" button</td>
+                    </tr>
+                    <tr>
+                        <td><code>email</code></td>
+                        <td>string</td>
+                        <td><code>''</code></td>
+                        <td>Email address for the "Email" button</td>
+                    </tr>
+                    <tr>
+                        <td><code>webhookUrl</code></td>
+                        <td>string</td>
+                        <td><code>''</code></td>
+                        <td>URL to receive form submissions (POST)</td>
+                    </tr>
+                    <tr>
+                        <td><code>textEnabled</code></td>
+                        <td>boolean</td>
+                        <td><code>true</code></td>
+                        <td>Show/hide the "Text" option</td>
+                    </tr>
+                    <tr>
+                        <td><code>callEnabled</code></td>
+                        <td>boolean</td>
+                        <td><code>true</code></td>
+                        <td>Show/hide the "Call" option</td>
+                    </tr>
+                    <tr>
+                        <td><code>emailEnabled</code></td>
+                        <td>boolean</td>
+                        <td><code>true</code></td>
+                        <td>Show/hide the "Email" option</td>
+                    </tr>
+                    <tr>
+                        <td><code>chatEnabled</code></td>
+                        <td>boolean</td>
+                        <td><code>false</code></td>
+                        <td>Show/hide the "Chat" option</td>
+                    </tr>
+                    <tr>
+                        <td><code>welcomeMessage</code></td>
+                        <td>string</td>
+                        <td><code>"I'm here if you have any questions..."</code></td>
+                        <td>Welcome message text</td>
+                    </tr>
+                    <tr>
+                        <td><code>position</code></td>
+                        <td>string</td>
+                        <td><code>'right'</code></td>
+                        <td>Widget position: <code>'left'</code> or <code>'right'</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>textConsentOptions</code></td>
+                        <td>array</td>
+                        <td><code>['Yes', 'No']</code></td>
+                        <td>Options for "Can we text you?" dropdown</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="demo-card">
+            <h2>JavaScript API</h2>
+
+            <h3>Open the widget programmatically</h3>
+            <pre><code>ConnectWidget.<span class="property">open</span>();</code></pre>
+
+            <h3>Close the widget programmatically</h3>
+            <pre><code>ConnectWidget.<span class="property">close</span>();</code></pre>
+
+            <h3>Access current configuration</h3>
+            <pre><code><span class="keyword">console</span>.<span class="property">log</span>(ConnectWidget.<span class="property">config</span>);</code></pre>
+        </div>
+
+        <div class="demo-card">
+            <h2>Webhook Payload</h2>
+            <p>When a form is submitted, the following JSON payload is sent to your webhook URL:</p>
+
+            <pre><code>{
+  <span class="property">"type"</span>: <span class="string">"text"</span>,
+  <span class="property">"firstName"</span>: <span class="string">"John"</span>,
+  <span class="property">"lastName"</span>: <span class="string">"Doe"</span>,
+  <span class="property">"phone"</span>: <span class="string">"(555) 123-4567"</span>,
+  <span class="property">"canText"</span>: <span class="string">"Yes"</span>,
+  <span class="property">"message"</span>: <span class="string">"I need help with..."</span>,
+  <span class="property">"timestamp"</span>: <span class="string">"2024-01-15T10:30:00.000Z"</span>,
+  <span class="property">"page"</span>: <span class="string">"https://example.com/contact"</span>
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Connect Widget Configuration -->
+    <script>
+        window.ConnectWidgetConfig = {
+            companyName: 'Lowden Plumbing & Heating',
+            companyLogo: 'https://scheduler_form_submissions.storage.googleapis.com/2026/01/27192614/lowden-logo-horizontal.svg',
+            primaryColor: '#019FDB',
+            primaryColorDark: '#2F3E57',
+            primaryColorLight: '#E2F3FD',
+            phone: '(319) 899-4381',
+            // Feature toggles
+            textEnabled: true,
+            emailEnabled: true,
+            callbackEnabled: true,
+            chatEnabled: true,
+            // HouseCall Pro integration (for Text form - creates leads in HCP)
+            hcpWorkerUrl: 'https://connect-widget-api.matthew-zilley.workers.dev',
+            // Formspree form IDs (for Email and Callback forms)
+            formspreeEmailId: 'mwvwgpbe',
+            formspreeCallbackId: 'mkopdgrl',
+            // Chat configuration (Claude-powered customer service)
+            chatWorkerUrl: 'https://connect-widget-api.matthew-zilley.workers.dev/chat',
+            chatWelcomeMessage: "Hi! I'm here to help with plumbing, heating, and cooling questions. How can I assist you today?",
+            // UI options
+            welcomeMessage: "I'm here if you have any questions or need help!",
+            address: '616 Main St. PO 249',
+            city: 'Lowden',
+            state: 'IA',
+            zip: '52405',
+            businessHours: 'Monday - Friday\n07:30-4:00',
+            position: 'right',
+        };
+    </script>
+    <!-- Connect Widget Script -->
+    <script src="connect-widget.js"></script>
+</body>
+</html>

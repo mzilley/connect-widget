@@ -1,0 +1,27 @@
+{
+  "name": "connect-widget",
+  "version": "1.0.0",
+  "description": "A lightweight, customizable contact widget for any website",
+  "main": "connect-widget.js",
+  "scripts": {
+    "build": "terser connect-widget.js -o dist/connect-widget.min.js -c -m",
+    "serve": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/connect-widget.git"
+  },
+  "keywords": [
+    "widget",
+    "contact",
+    "chat",
+    "embed",
+    "customer-service",
+    "lead-generation"
+  ],
+  "author": "Matt Zilley",
+  "license": "MIT",
+  "devDependencies": {
+    "terser": "^5.27.0"
+  }
+}
