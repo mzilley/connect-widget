@@ -91,7 +91,7 @@
             border-radius: 4px;
         }
 
-        .cw-floating-btn:hover {
+        .cw-floating-btn:hover, .cw-floating-btn:focus {
             background: rgba(255, 255, 255, 0.15);
         }
 
@@ -244,7 +244,7 @@
             transition: background 0.2s ease;
         }
 
-        .cw-popup-header-btn:hover {
+        .cw-popup-header-btn:hover, .cw-popup-header-btn:focus {
             background: #d8d8d8;
         }
 
@@ -488,7 +488,7 @@
             transition: background 0.2s ease;
         }
 
-        .cw-submit-btn:hover {
+        .cw-submit-btn:hover, .cw-submit-btn:focus {
             background: var(--cw-primary-dark);
         }
 
@@ -689,6 +689,7 @@
             border: none;
             background: #f0f0f0;
             border-radius: 50%;
+            padding: 0;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -868,7 +869,7 @@
             transition: background 0.2s ease, transform 0.1s ease;
         }
 
-        .cw-chat-send:hover {
+        .cw-chat-send:hover, .cw-chat-send:focus {
             background: var(--cw-primary-dark);
         }
 
@@ -952,7 +953,7 @@
         }
 
         .cw-expanded-body .cw-chat-input-area {
-            padding: 16px 24px;
+            padding: 16px 0 0;
         }
 
         @media (max-width: 420px) {
