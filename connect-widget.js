@@ -152,6 +152,7 @@
             right: 8px;
             width: 24px;
             height: 24px;
+            padding: 0;
             border: none;
             background: #f0f0f0;
             border-radius: 50%;
@@ -231,6 +232,7 @@
         .cw-popup-header-btn {
             width: 32px;
             height: 32px;
+            padding: 0;
             border: none;
             background: #e8e8e8;
             border-radius: 50%;
@@ -825,7 +827,7 @@
         .cw-chat-input-area {
             display: flex;
             gap: 8px;
-            padding: 12px 16px;
+            padding: 16px 0 0;
             border-top: 1px solid #eee;
             background: white;
         }
@@ -1217,8 +1219,7 @@
                                 <select class="cw-form-select" name="Best Time to Call">
                                     <option value="">Any time</option>
                                     <option value="Morning (8am-12pm)">Morning (8am-12pm)</option>
-                                    <option value="Afternoon (12pm-5pm)">Afternoon (12pm-5pm)</option>
-                                    <option value="Evening (5pm-8pm)">Evening (5pm-8pm)</option>
+                                    <option value="Afternoon (12pm-4pm)">Afternoon (12pm-4pm)</option>
                                 </select>
                             </div>
                             <div class="cw-form-group">
@@ -1723,6 +1724,7 @@
                     },
                     body: JSON.stringify({
                         messages: chatMessages,
+                        companyName: config.companyName,
                     }),
                 });
 

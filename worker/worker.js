@@ -15,7 +15,9 @@ const HCP_BASE_URL = 'https://api.housecallpro.com';
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
 // System prompt for chat with strict guardrails
-const CHAT_SYSTEM_PROMPT = `You are a helpful customer service assistant for Cedar Rapids Plumbing, Heating & Cooling (also known as Lowden Plumbing & Heating). We are a locally owned and operated company serving Eastern Iowa for over 70 years, established in 1953.
+function getChatSystemPrompt(companyName) {
+    const name = companyName || 'Cedar Rapids Plumbing, Heating & Cooling';
+    return `You are a helpful customer service assistant for ${name}. We are a locally owned and operated company serving Eastern Iowa for over 70 years, established in 1953.
 
 ## YOUR ROLE
 You help potential and existing customers with:
@@ -189,6 +191,7 @@ When recommending they contact us, mention the options:
 - Text us
 
 For emergencies, always recommend calling directly.`;
+}
 
 // CORS headers
 function corsHeaders(origin, allowedOrigins) {
@@ -393,7 +396,7 @@ async function handleChatRequest(request, env) {
 
     try {
         const body = await request.json();
-        const { messages } = body;
+        const { messages, companyName } = body;
 
         const preparedMessages = prepareMessages(messages);
 
@@ -417,7 +420,7 @@ async function handleChatRequest(request, env) {
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
                 max_tokens: 500,
-                system: CHAT_SYSTEM_PROMPT,
+                system: getChatSystemPrompt(companyName),
                 messages: preparedMessages,
             }),
         });
