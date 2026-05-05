@@ -50,7 +50,7 @@
         .cw-widget-container {
             --cw-primary: ${config.primaryColor};
             --cw-primary-dark: ${config.primaryColorDark || adjustColor(config.primaryColor, -20)};
-            --cw-primary-light: ${config.primaryColorLight || adjustColor(config.primaryColor, 40)};
+            --cw-primary-light: ${config.primaryColorLight || '#E2F3FD'};
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             font-size: 16px;
             line-height: 1.5;
