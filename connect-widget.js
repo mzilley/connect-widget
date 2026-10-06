@@ -967,6 +967,51 @@
         }
     `;
 
+    // =====================
+    // Lead Attribution
+    // =====================
+    // Stores the visitor's first-touch source in a cookie shared with the HCP Scheduler
+    // plugin. A later visit carrying a gclid or UTM parameters replaces the stored values.
+    const ATTRIBUTION_COOKIE = 'lead_attribution';
+    const ATTRIBUTION_MAX_AGE = 90 * 24 * 60 * 60; // 90 days, matches the Google Ads click window
+
+    function readAttribution() {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + ATTRIBUTION_COOKIE + '=([^;]*)'));
+        if (!match) return null;
+        try {
+            return JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function captureAttribution() {
+        const params = new URLSearchParams(window.location.search);
+        const touch = {
+            gclid: params.get('gclid') || '',
+            utm_source: params.get('utm_source') || '',
+            utm_medium: params.get('utm_medium') || '',
+            utm_campaign: params.get('utm_campaign') || '',
+        };
+        const isCampaignVisit = Object.values(touch).some(Boolean);
+
+        if (readAttribution() && !isCampaignVisit) return;
+
+        touch.landing_page = window.location.href;
+        touch.referrer = document.referrer;
+        Object.keys(touch).forEach(key => { touch[key] = touch[key].slice(0, 500); });
+
+        document.cookie = ATTRIBUTION_COOKIE + '=' + encodeURIComponent(JSON.stringify(touch))
+            + '; path=/; max-age=' + ATTRIBUTION_MAX_AGE + '; SameSite=Lax'
+            + (window.location.protocol === 'https:' ? '; Secure' : '');
+    }
+
+    function getAttribution() {
+        return readAttribution() || {};
+    }
+
+    captureAttribution();
+
     // Helper function to adjust color brightness
     function adjustColor(color, percent) {
         const num = parseInt(color.replace('#', ''), 16);
@@ -1503,6 +1548,7 @@
             }
 
             const formData = new FormData(form);
+            const attribution = getAttribution();
             const data = {
                 firstName: formData.get('firstName'),
                 lastName: formData.get('lastName'),
@@ -1511,6 +1557,12 @@
                 message: formData.get('message'),
                 pageUrl: window.location.href,
                 formType: 'Connect Widget - Text',
+                gclid: attribution.gclid || '',
+                utmSource: attribution.utm_source || '',
+                utmMedium: attribution.utm_medium || '',
+                utmCampaign: attribution.utm_campaign || '',
+                landingPage: attribution.landing_page || '',
+                referrer: attribution.referrer || '',
             };
 
             try {
@@ -1552,6 +1604,13 @@
             }
 
             const formData = new FormData(form);
+            const attribution = getAttribution();
+            formData.append('GCLID', attribution.gclid || '');
+            formData.append('UTM Source', attribution.utm_source || '');
+            formData.append('UTM Medium', attribution.utm_medium || '');
+            formData.append('UTM Campaign', attribution.utm_campaign || '');
+            formData.append('Landing Page', attribution.landing_page || '');
+            formData.append('Original Referrer', attribution.referrer || '');
 
             try {
                 const response = await fetch(`https://formspree.io/f/${formspreeId}`, {
