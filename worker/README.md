@@ -12,6 +12,8 @@ When someone submits the "Text Us" form in the Connect Widget:
 
 This creates a lead in HCP just like your WordPress form does!
 
+> **Note:** The "Text Us" form only *creates a lead* in HouseCall Pro — it does **not** send an SMS to the customer. See [Known Limitations](#known-limitations).
+
 ## Setup Instructions
 
 ### 1. Install Wrangler CLI
@@ -110,7 +112,7 @@ Creates a lead in HouseCall Pro.
 | `phone` | string | Yes* | Phone number (formatted or unformatted) |
 | `email` | string | Yes* | Email address |
 | `canText` | string | No | Text consent (Yes/No) |
-| `message` | string | No | Issue description |
+| `message` | string | Yes† | Issue description |
 | `pageUrl` | string | No | Page URL where form was submitted |
 | `formType` | string | No | Form identifier for tracking |
 | `street` | string | No | Street address |
@@ -119,6 +121,7 @@ Creates a lead in HouseCall Pro.
 | `zip` | string | No | ZIP code |
 
 *At least one of `phone` or `email` is required.
+†`message` is required when `formType` contains "Text" (the Text Us form). It stays optional for the Callback form.
 
 **Response:**
 
@@ -130,6 +133,24 @@ Creates a lead in HouseCall Pro.
   "leadId": "lea_xxxxx"
 }
 ```
+
+## Known Limitations
+
+### The "Text Us" form does not send an SMS
+
+The Text Us form **creates a lead** in the HouseCall Pro Job Inbox (with the customer's
+message in the note) — but it does **not** send a text message to the customer. The button
+label and the "Can we text you?" question imply a two-way text conversation that the backend
+does not actually start.
+
+**Why:** HouseCall Pro's public REST API has no documented endpoint for sending outbound
+SMS. The worker can only create customers and leads, so the outbound-text step was never
+built. Sending a real SMS would require adding a third-party provider (e.g. Twilio) with its
+own account, phone number, and credentials.
+
+**Current behavior is intentional and safe** — leads still land in the Job Inbox and can be
+followed up on manually. This note exists so the gap between the UI wording and the backend
+behavior is on the record.
 
 ## Security
 

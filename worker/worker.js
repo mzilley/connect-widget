@@ -531,6 +531,16 @@ async function handleLeadRequest(request, env) {
         const pageUrl = data.pageUrl || data['Page URL'] || '';
         const formType = data.formType || data['_source'] || 'Connect Widget';
 
+        // Attribution fields (captured on the visitor's first page view by the widget)
+        const attribution = [
+            ['GCLID', data.gclid || data['GCLID']],
+            ['UTM Source', data.utmSource || data['UTM Source']],
+            ['UTM Medium', data.utmMedium || data['UTM Medium']],
+            ['UTM Campaign', data.utmCampaign || data['UTM Campaign']],
+            ['Landing Page', data.landingPage || data['Landing Page']],
+            ['Original Referrer', data.referrer || data['Original Referrer']],
+        ].filter(([, value]) => value);
+
         // Address fields (optional)
         const street = data.street || data['Street'] || '';
         const city = data.city || data['City'] || '';
@@ -556,6 +566,16 @@ async function handleLeadRequest(request, env) {
             );
         }
 
+        // Text form requires a message describing the issue (Callback message is optional)
+        if (formType.includes('Text') && !message.trim()) {
+            return jsonResponse(
+                { error: 'Message is required' },
+                400,
+                origin,
+                env.ALLOWED_ORIGINS
+            );
+        }
+
         // Build the note/summary with clear source identifier
         let note = '📱 CONNECT WIDGET LEAD\n';
         note += '━━━━━━━━━━━━━━━━━━━━━━\n';
@@ -570,6 +590,10 @@ async function handleLeadRequest(request, env) {
         }
         if (message) {
             note += `\nMessage:\n${message}`;
+        }
+        if (attribution.length) {
+            note += '\n\nAttribution:\n';
+            note += attribution.map(([label, value]) => `${label}: ${value}`).join('\n');
         }
 
         // Create or find customer
