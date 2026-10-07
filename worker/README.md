@@ -111,17 +111,39 @@ Creates a lead in HouseCall Pro.
 | `lastName` | string | No | Customer's last name |
 | `phone` | string | Yes* | Phone number (formatted or unformatted) |
 | `email` | string | Yes* | Email address |
-| `canText` | string | No | Text consent (Yes/No) |
+| `canText` | string | No | Text consent (Yes/No), Text form |
+| `bestTimeToCall` | string | No | Preferred call window, Callback form |
 | `message` | string | Yes† | Issue description |
 | `pageUrl` | string | No | Page URL where form was submitted |
-| `formType` | string | No | Form identifier for tracking |
+| `formType` | string | No | `Connect Widget - Text`, `Connect Widget - Email` or `Connect Widget - Callback` |
+| `gclid`, `utmSource`, `utmMedium`, `utmCampaign`, `landingPage`, `referrer` | string | No | Attribution captured by the widget; added to the lead note and sent to elite |
+| `website` | string | No | Honeypot. Must be empty; if filled, the worker returns success and creates nothing |
 | `street` | string | No | Street address |
 | `city` | string | No | City |
 | `state` | string | No | State |
 | `zip` | string | No | ZIP code |
 
-*At least one of `phone` or `email` is required.
-†`message` is required when `formType` contains "Text" (the Text Us form). It stays optional for the Callback form.
+*At least one of `phone` or `email` is required. Each form also has its own requirements:
+
+| `formType` | Requires | elite `lead_type` |
+|---|---|---|
+| `Connect Widget - Text` | `phone`, `message` | Text |
+| `Connect Widget - Email` | `email`, `message` | Email |
+| `Connect Widget - Callback` | `phone` | Call |
+
+†`message` is required for the Text and Email forms and optional for Callback.
+
+## elite lead tracker
+
+After each HCP lead is created, the worker sends a signed copy of it (HCP lead and customer IDs, lead type, contact details and attribution) to the elite Worker over the `LEADS` service binding, using `ctx.waitUntil` so the visitor never waits. Failures are logged and ignored; the HCP lead note keeps the attribution either way.
+
+Setup:
+
+1. Deploy elite first, on the same Cloudflare account. The `[[services]]` binding in `wrangler.toml` must resolve or this worker won't deploy.
+2. Give this worker the same secret as elite: `npx wrangler secret put INTAKE_SECRET`.
+3. Deploy this worker.
+
+If the `LEADS` binding is missing, the worker skips the copy and still creates HCP leads.
 
 **Response:**
 

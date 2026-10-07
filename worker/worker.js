@@ -2,14 +2,18 @@
  * Connect Widget API Worker
  *
  * Cloudflare Worker that handles:
- * 1. Form submissions → creates leads in HouseCall Pro
+ * 1. Form submissions (Text, Email, Callback) → creates leads in HouseCall Pro
+ *    and sends a copy to the elite tracker
  * 2. Chat messages → responds via Claude API
  *
  * Environment Variables (set in Cloudflare dashboard):
  * - HCP_API_KEY: Your HouseCall Pro API key
  * - ANTHROPIC_API_KEY: Your Claude API key (for chat)
  * - ALLOWED_ORIGINS: Comma-separated list of allowed origins
+ * - INTAKE_SECRET: Shared secret for the elite Worker (LEADS service binding)
  */
+
+import { sendToLeadTracker } from './lead-tracker.js';
 
 const HCP_BASE_URL = 'https://api.housecallpro.com';
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -489,7 +493,15 @@ async function handleChatRequest(request, env) {
 // Lead Handler
 // =====================
 
-async function handleLeadRequest(request, env) {
+// Widget forms, keyed by the formType the widget sends. leadType is the
+// elite lead_type; requires lists the fields that form must include.
+const FORM_TYPES = {
+    'Connect Widget - Text': { leadType: 'Text', requires: ['phone', 'message'] },
+    'Connect Widget - Email': { leadType: 'Email', requires: ['email', 'message'] },
+    'Connect Widget - Callback': { leadType: 'Call', requires: ['phone'] },
+};
+
+async function handleLeadRequest(request, env, ctx) {
     const origin = request.headers.get('Origin') || '*';
 
     // Check API key
@@ -528,17 +540,31 @@ async function handleLeadRequest(request, env) {
         const email = data.email || data['Email'] || '';
         const message = data.message || data['Message'] || '';
         const canText = data.canText || data['Can Text'] || '';
+        const bestTimeToCall = data.bestTimeToCall || '';
         const pageUrl = data.pageUrl || data['Page URL'] || '';
         const formType = data.formType || data['_source'] || 'Connect Widget';
+        const formConfig = FORM_TYPES[formType];
+
+        // Honeypot: the hidden "website" field is only filled in by bots. Report
+        // success so the bot moves on, but create nothing.
+        if (data.website) {
+            console.log('Honeypot triggered, submission dropped', { formType });
+            return jsonResponse({ success: true }, 200, origin, env.ALLOWED_ORIGINS);
+        }
 
         // Attribution fields (captured on the visitor's first page view by the widget)
+        const gclid = data.gclid || '';
+        const utmSource = data.utmSource || '';
+        const utmMedium = data.utmMedium || '';
+        const utmCampaign = data.utmCampaign || '';
+        const landingPage = data.landingPage || '';
         const attribution = [
-            ['GCLID', data.gclid || data['GCLID']],
-            ['UTM Source', data.utmSource || data['UTM Source']],
-            ['UTM Medium', data.utmMedium || data['UTM Medium']],
-            ['UTM Campaign', data.utmCampaign || data['UTM Campaign']],
-            ['Landing Page', data.landingPage || data['Landing Page']],
-            ['Original Referrer', data.referrer || data['Original Referrer']],
+            ['GCLID', gclid],
+            ['UTM Source', utmSource],
+            ['UTM Medium', utmMedium],
+            ['UTM Campaign', utmCampaign],
+            ['Landing Page', landingPage],
+            ['Original Referrer', data.referrer],
         ].filter(([, value]) => value);
 
         // Address fields (optional)
@@ -566,10 +592,12 @@ async function handleLeadRequest(request, env) {
             );
         }
 
-        // Text form requires a message describing the issue (Callback message is optional)
-        if (formType.includes('Text') && !message.trim()) {
+        // Form-specific required fields (e.g. Text needs a message, Email needs an email)
+        const provided = { phone, email, message: message.trim() };
+        const missing = formConfig ? formConfig.requires.find((field) => !provided[field]) : null;
+        if (missing) {
             return jsonResponse(
-                { error: 'Message is required' },
+                { error: `${missing.charAt(0).toUpperCase() + missing.slice(1)} is required` },
                 400,
                 origin,
                 env.ALLOWED_ORIGINS
@@ -582,8 +610,14 @@ async function handleLeadRequest(request, env) {
         if (formType && formType !== 'Connect Widget') {
             note += `Form: ${formType}\n`;
         }
+        if (email) {
+            note += `Email: ${email}\n`;
+        }
         if (canText) {
             note += `Can Text: ${canText}\n`;
+        }
+        if (bestTimeToCall) {
+            note += `Best Time to Call: ${bestTimeToCall}\n`;
         }
         if (pageUrl) {
             note += `Page: ${pageUrl}\n`;
@@ -603,6 +637,24 @@ async function handleLeadRequest(request, env) {
 
         // Create lead
         const lead = await createLead(customerId, street, city, state, zip, note.trim(), env.HCP_API_KEY);
+
+        // Copy the lead to the elite tracker without delaying the response.
+        // Skipped if the LEADS service binding isn't configured.
+        if (env.LEADS) {
+            ctx.waitUntil(sendToLeadTracker(env, {
+                hcp_lead_id: lead.id,
+                hcp_customer_id: customerId,
+                lead_type: formConfig ? formConfig.leadType : 'Form',
+                phone,
+                email,
+                name: `${firstName} ${lastName}`.trim(),
+                gclid,
+                utm_source: utmSource,
+                utm_medium: utmMedium,
+                utm_campaign: utmCampaign,
+                landing_page: landingPage,
+            }));
+        }
 
         return jsonResponse(
             {
@@ -659,6 +711,6 @@ export default {
         }
 
         // Default: handle as lead request (backwards compatible)
-        return handleLeadRequest(request, env);
+        return handleLeadRequest(request, env, ctx);
     },
 };

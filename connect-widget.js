@@ -26,11 +26,8 @@
         emailEnabled: true,
         callbackEnabled: false,
         chatEnabled: false,
-        // HouseCall Pro API (for Text form - creates leads)
+        // HouseCall Pro API (Text, Email and Callback forms all create leads through it)
         hcpWorkerUrl: '', // URL to your Cloudflare Worker
-        // Formspree form IDs (for Email and Callback forms)
-        formspreeEmailId: '',
-        formspreeCallbackId: '',
         // Chat configuration
         chatWorkerUrl: '', // URL to your chat Cloudflare Worker
         chatWelcomeMessage: "Hi! I'm here to help with plumbing, heating, and cooling questions. How can I assist you today?",
@@ -378,6 +375,14 @@
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
+        }
+
+        .cw-hp {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
         }
 
         .cw-form-group {
@@ -1065,7 +1070,7 @@
             `;
         }
 
-        if (config.emailEnabled && config.formspreeEmailId) {
+        if (config.emailEnabled && config.hcpWorkerUrl) {
             options += `
                 <button class="cw-menu-option" data-action="email">
                     ${icons.email}
@@ -1074,7 +1079,7 @@
             `;
         }
 
-        if (config.callbackEnabled && config.formspreeCallbackId) {
+        if (config.callbackEnabled && config.hcpWorkerUrl) {
             options += `
                 <button class="cw-menu-option" data-action="callback">
                     ${icons.callback}
@@ -1120,13 +1125,13 @@
                         <span class="cw-floating-btn-label">Text Us</span>
                     </button>
                 ` : ''}
-                ${config.emailEnabled && config.formspreeEmailId ? `
+                ${config.emailEnabled && config.hcpWorkerUrl ? `
                     <button class="cw-floating-btn" id="cw-btn-email" data-action="email">
                         ${icons.email}
                         <span class="cw-floating-btn-label">Email Us</span>
                     </button>
                 ` : ''}
-                ${config.callbackEnabled && config.formspreeCallbackId ? `
+                ${config.callbackEnabled && config.hcpWorkerUrl ? `
                     <button class="cw-floating-btn" id="cw-btn-callback" data-action="callback">
                         ${icons.callback}
                         <span class="cw-floating-btn-label">Request Callback</span>
@@ -1178,7 +1183,8 @@
                             <h2>Send us a text</h2>
                             <p>Let us know what you need, and we'll get back to you as soon as we can.</p>
                         </div>
-                        <form id="cw-text-form" data-handler="hcp">
+                        <form id="cw-text-form" data-form-type="Connect Widget - Text">
+                            <input type="text" name="website" class="cw-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
                             <div class="cw-form-row">
                                 <div class="cw-form-group">
                                     <input type="text" class="cw-form-input" name="firstName" placeholder="First Name" required>
@@ -1212,26 +1218,24 @@
                             <h2>Email us</h2>
                             <p>Send us an email and we'll respond as soon as possible.</p>
                         </div>
-                        <form id="cw-email-form" data-formspree-id="${config.formspreeEmailId}">
-                            <input type="hidden" name="_subject" value="New Email from Connect Widget">
-                            <input type="hidden" name="_source" value="Connect Widget - Email">
-                            <input type="hidden" name="Page URL" id="cw-email-page-url">
+                        <form id="cw-email-form" data-form-type="Connect Widget - Email">
+                            <input type="text" name="website" class="cw-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
                             <div class="cw-form-row">
                                 <div class="cw-form-group">
-                                    <input type="text" class="cw-form-input" name="First Name" placeholder="First Name" required>
+                                    <input type="text" class="cw-form-input" name="firstName" placeholder="First Name" required>
                                 </div>
                                 <div class="cw-form-group">
-                                    <input type="text" class="cw-form-input" name="Last Name" placeholder="Last Name" required>
+                                    <input type="text" class="cw-form-input" name="lastName" placeholder="Last Name" required>
                                 </div>
                             </div>
                             <div class="cw-form-group">
-                                <input type="email" class="cw-form-input" name="Email" placeholder="Email Address" required>
+                                <input type="email" class="cw-form-input" name="email" placeholder="Email Address" required>
                             </div>
                             <div class="cw-form-group">
-                                <input type="tel" class="cw-form-input cw-phone-input" name="Phone" placeholder="Phone Number (optional)">
+                                <input type="tel" class="cw-form-input cw-phone-input" name="phone" placeholder="Phone Number (optional)">
                             </div>
                             <div class="cw-form-group">
-                                <textarea class="cw-form-textarea" name="Message" placeholder="How can we help you?" required></textarea>
+                                <textarea class="cw-form-textarea" name="message" placeholder="How can we help you?" required></textarea>
                             </div>
                             <div class="cw-form-footer">
                                 <button type="submit" class="cw-submit-btn">Send</button>
@@ -1245,31 +1249,29 @@
                             <h2>Request a callback</h2>
                             <p>Leave your number and we'll call you back.</p>
                         </div>
-                        <form id="cw-callback-form" data-formspree-id="${config.formspreeCallbackId}">
-                            <input type="hidden" name="_subject" value="New Callback Request from Connect Widget">
-                            <input type="hidden" name="_source" value="Connect Widget - Callback">
-                            <input type="hidden" name="Page URL" id="cw-callback-page-url">
+                        <form id="cw-callback-form" data-form-type="Connect Widget - Callback">
+                            <input type="text" name="website" class="cw-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
                             <div class="cw-form-row">
                                 <div class="cw-form-group">
-                                    <input type="text" class="cw-form-input" name="First Name" placeholder="First Name" required>
+                                    <input type="text" class="cw-form-input" name="firstName" placeholder="First Name" required>
                                 </div>
                                 <div class="cw-form-group">
-                                    <input type="text" class="cw-form-input" name="Last Name" placeholder="Last Name" required>
+                                    <input type="text" class="cw-form-input" name="lastName" placeholder="Last Name" required>
                                 </div>
                             </div>
                             <div class="cw-form-group">
-                                <input type="tel" class="cw-form-input cw-phone-input" name="Phone" placeholder="Phone Number" required>
+                                <input type="tel" class="cw-form-input cw-phone-input" name="phone" placeholder="Phone Number" required>
                             </div>
                             <div class="cw-form-group">
                                 <label class="cw-form-label">Best time to call</label>
-                                <select class="cw-form-select" name="Best Time to Call">
+                                <select class="cw-form-select" name="bestTimeToCall">
                                     <option value="">Any time</option>
                                     <option value="Morning (8am-12pm)">Morning (8am-12pm)</option>
                                     <option value="Afternoon (12pm-4pm)">Afternoon (12pm-4pm)</option>
                                 </select>
                             </div>
                             <div class="cw-form-group">
-                                <textarea class="cw-form-textarea" name="Message" placeholder="What would you like to discuss? (optional)"></textarea>
+                                <textarea class="cw-form-textarea" name="message" placeholder="What would you like to discuss? (optional)"></textarea>
                             </div>
                             <div class="cw-form-footer">
                                 <button type="submit" class="cw-submit-btn">Request Callback</button>
@@ -1540,23 +1542,19 @@
             });
         });
 
-        // Submit form to HouseCall Pro via worker
+        // Submit form to HouseCall Pro via worker. The form's data-form-type tells
+        // the worker which form it came from (Text, Email or Callback).
         async function submitToHCP(form) {
             if (!config.hcpWorkerUrl) {
                 console.error('Connect Widget: No HCP Worker URL configured');
                 return false;
             }
 
-            const formData = new FormData(form);
             const attribution = getAttribution();
             const data = {
-                firstName: formData.get('firstName'),
-                lastName: formData.get('lastName'),
-                phone: formData.get('phone'),
-                canText: formData.get('canText'),
-                message: formData.get('message'),
+                ...Object.fromEntries(new FormData(form)),
                 pageUrl: window.location.href,
-                formType: 'Connect Widget - Text',
+                formType: form.dataset.formType,
                 gclid: attribution.gclid || '',
                 utmSource: attribution.utm_source || '',
                 utmMedium: attribution.utm_medium || '',
@@ -1589,51 +1587,6 @@
             }
         }
 
-        // Submit form to Formspree
-        async function submitToFormspree(form) {
-            const formspreeId = form.dataset.formspreeId;
-            if (!formspreeId) {
-                console.error('Connect Widget: No Formspree ID configured');
-                return false;
-            }
-
-            // Set the page URL hidden field
-            const pageUrlInput = form.querySelector('[name="Page URL"]');
-            if (pageUrlInput) {
-                pageUrlInput.value = window.location.href;
-            }
-
-            const formData = new FormData(form);
-            const attribution = getAttribution();
-            formData.append('GCLID', attribution.gclid || '');
-            formData.append('UTM Source', attribution.utm_source || '');
-            formData.append('UTM Medium', attribution.utm_medium || '');
-            formData.append('UTM Campaign', attribution.utm_campaign || '');
-            formData.append('Landing Page', attribution.landing_page || '');
-            formData.append('Original Referrer', attribution.referrer || '');
-
-            try {
-                const response = await fetch(`https://formspree.io/f/${formspreeId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    return true;
-                } else {
-                    const data = await response.json();
-                    console.error('Connect Widget: Formspree error', data);
-                    return false;
-                }
-            } catch (error) {
-                console.error('Connect Widget: Form submission error', error);
-                return false;
-            }
-        }
-
         // Handle form submission (reusable for both popup and expanded)
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -1644,15 +1597,7 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
 
-            // Determine which handler to use
-            const handler = form.dataset.handler;
-            let success = false;
-
-            if (handler === 'hcp') {
-                success = await submitToHCP(form);
-            } else {
-                success = await submitToFormspree(form);
-            }
+            const success = await submitToHCP(form);
 
             if (success) {
                 // Show success based on context
